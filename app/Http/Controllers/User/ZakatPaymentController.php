@@ -45,42 +45,70 @@ class ZakatPaymentController extends Controller
             'jumlah_jiwa' => 'required|integer|min:0',
             'metode_pembayaran' => 'required|in:tunai,beras',
 
-            'rice_type_id' => 'required_if:metode_pembayaran,tunai|exists:rice_types,id',
-            'bayar' => 'required_if:metode_pembayaran,tunai|integer|min:0',
-            'beras_kg' => 'required_if:metode_pembayaran,beras|numeric|min:0',
+            // validasi dasar (akan dipersempit di bawah)
+            'bayar' => 'nullable|integer|min:0',
+            'beras_kg' => 'nullable|numeric|min:0',
+            'rice_type_id' => 'nullable|exists:rice_types,id',
         ]);
 
-        // ✅ muzakki + tanggungan
-        $jumlahJiwa = $request->jumlah_jiwa + 1;
+        $zakatType = ZakatType::findOrFail($request->zakat_type_id);
+        $isFitrah = strtolower($zakatType->name) === 'zakat fitrah';
+
+        // ===============================
+        // JUMLAH ORANG
+        // ===============================
+        $jumlahJiwa = $isFitrah
+            ? $request->jumlah_jiwa + 1 // muzakki + tanggungan
+            : $request->jumlah_jiwa;   // zakat lain: apa adanya
 
         $bayar = 0;
         $infaq = 0;
 
-        if ($request->metode_pembayaran === 'tunai') {
-            $rice = RiceType::findOrFail($request->rice_type_id);
-            $wajibBayar = $rice->price * $jumlahJiwa;
+        // ===============================
+        // ZAKAT FITRAH
+        // ===============================
+        if ($isFitrah) {
 
-            $bayar = $request->bayar;
-            if ($request->bayar < $wajibBayar) {
-                return back()
-                    ->withErrors([
-                        'bayar' => 'Nominal bayar tidak boleh kurang dari kewajiban zakat.'
-                    ])
-                    ->withInput();
+            if ($request->metode_pembayaran === 'tunai') {
+
+                if (!$request->rice_type_id) {
+                    return back()->withErrors([
+                        'rice_type_id' => 'Jenis beras wajib dipilih untuk zakat fitrah.'
+                    ])->withInput();
+                }
+
+                $rice = RiceType::findOrFail($request->rice_type_id);
+                $wajibBayar = $rice->price * $jumlahJiwa;
+
+                if ($request->bayar < $wajibBayar) {
+                    return back()->withErrors([
+                        'bayar' => 'Nominal bayar tidak boleh kurang dari kewajiban zakat fitrah.'
+                    ])->withInput();
+                }
+
+                $bayar = $request->bayar;
+                $infaq = max(0, $bayar - $wajibBayar);
+            } else {
+                // === BERAS ===
+                $wajibKg = $jumlahJiwa * 3;
+
+                if ($request->beras_kg < $wajibKg) {
+                    return back()->withErrors([
+                        'beras_kg' => 'Jumlah beras tidak boleh kurang dari kewajiban zakat fitrah.'
+                    ])->withInput();
+                }
+
+                $bayar = $wajibKg;
+                $infaq = max(0, $request->beras_kg - $wajibKg);
             }
-            $infaq = max(0, $bayar - $wajibBayar);
-        } else {
-            // pembayaran beras
-            $wajibKg = $jumlahJiwa * 3;
-            if ($request->beras_kg < $wajibKg) {
-                return back()
-                    ->withErrors([
-                        'beras_kg' => 'Jumlah beras tidak boleh kurang dari kewajiban zakat.'
-                    ])
-                    ->withInput();
-            }
-            $bayar = $wajibKg; // simpan kewajiban kg
-            $infaq = max(0, $request->beras_kg - $wajibKg);
+        }
+        // ===============================
+        // ZAKAT MAAL & FIDIYAH
+        // ===============================
+        else {
+            // bebas, tidak ada kewajiban
+            $bayar = $request->bayar ?? 0;
+            $infaq = 0;
         }
 
         ZakatPayment::create([
@@ -91,7 +119,7 @@ class ZakatPaymentController extends Controller
             'blok' => $request->blok,
             'phone' => $request->phone,
             'zakat_type_id' => $request->zakat_type_id,
-            'rice_type_id' => $request->metode_pembayaran === 'tunai'
+            'rice_type_id' => $isFitrah && $request->metode_pembayaran === 'tunai'
                 ? $request->rice_type_id
                 : null,
             'jumlah_jiwa' => $jumlahJiwa,

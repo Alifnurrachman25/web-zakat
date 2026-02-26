@@ -23,11 +23,21 @@
 
             <form method="POST" action="{{ route('user.zakat.store') }}" x-data="{
                 metode: '{{ old('metode_pembayaran', 'tunai') }}',
+                zakatType: '{{ old('zakat_type_id') }}',
                 jumlah: {{ old('jumlah_jiwa', 0) }},
                 ricePrice: {{ old('rice_type_id') ? $riceTypes->firstWhere('id', old('rice_type_id'))?->price ?? 48000 : 48000 }},
-                get totalOrang() { return Number(this.jumlah) + 1 },
-                get wajibTunai() { return this.totalOrang * this.ricePrice },
-                get wajibBeras() { return this.totalOrang * 3 }
+                get isFitrah() {
+                    return this.zakatType == '{{ $zakatTypes->firstWhere('name', 'Zakat Fitrah')->id ?? '' }}'
+                },
+                get totalOrang() {
+                    return Number(this.jumlah) + 1
+                },
+                get wajibTunai() {
+                    return this.isFitrah ? this.totalOrang * this.ricePrice : '-'
+                },
+                get wajibBeras() {
+                    return this.isFitrah ? this.totalOrang * 3 : '-'
+                }
             }" class="space-y-6">
 
                 @csrf
@@ -84,7 +94,8 @@
                     {{-- Jenis Zakat --}}
                     <div>
                         <label class="block text-sm font-medium">Jenis Zakat</label>
-                        <select name="zakat_type_id" class="w-full border border-black rounded px-3 py-2">
+                        <select name="zakat_type_id" x-model="zakatType"
+                            class="w-full border border-black rounded px-3 py-2">
                             <option value="">-- Pilih --</option>
                             @foreach ($zakatTypes as $z)
                                 <option value="{{ $z->id }}" @selected(old('zakat_type_id') == $z->id)>
@@ -120,13 +131,12 @@
 
                             <div>
                                 <label class="block text-sm font-medium">Jenis Beras</label>
-                                <select name="rice_type_id"
+                                <select name="rice_type_id" :disabled="!isFitrah"
                                     @change="ricePrice = $event.target.options[$event.target.selectedIndex].dataset.price"
-                                    class="w-full border border-black rounded px-3 py-2">
+                                    class="w-full border border-black rounded px-3 py-2 disabled:bg-gray-200">
                                     <option value="">-- Pilih --</option>
                                     @foreach ($riceTypes as $r)
-                                        <option value="{{ $r->id }}" data-price="{{ $r->price }}"
-                                            @selected(old('rice_type_id') == $r->id)>
+                                        <option value="{{ $r->id }}" data-price="{{ $r->price }}">
                                             {{ $r->name }} (Rp {{ number_format($r->price) }})
                                         </option>
                                     @endforeach
@@ -135,13 +145,14 @@
 
                             <div>
                                 <label class="block text-sm font-medium">Bayar (Rp)</label>
-                                <input type="number" min="0" name="bayar" value="{{ old('bayar') }}"
+                                <input type="number" min="0" name="bayar"
                                     class="w-full border border-black rounded px-3 py-2">
                             </div>
 
                             <div class="col-span-2">
-                                <label class="block text-sm font-medium">Wajib Bayar</label>
-                                <input type="text" readonly :value="wajibTunai.toLocaleString('id-ID')"
+                                <label class="block text-sm font-medium text-black">Wajib Bayar</label>
+                                <input type="text" readonly
+                                    :value="isFitrah ? wajibTunai.toLocaleString('id-ID') : '-'"
                                     class="w-full border border-black bg-gray-100 rounded px-3 py-2">
                             </div>
 
@@ -155,12 +166,12 @@
                             <div>
                                 <label class="block text-sm font-medium">Jumlah Beras (Kg)</label>
                                 <input type="number" step="0.1" min="0" name="beras_kg"
-                                    value="{{ old('beras_kg') }}" class="w-full border border-black rounded px-3 py-2">
+                                    class="w-full border border-black rounded px-3 py-2">
                             </div>
 
                             <div>
-                                <label class="block text-sm font-medium">Wajib Beras</label>
-                                <input type="text" readonly :value="wajibBeras + ' Kg'"
+                                <label class="block text-sm font-medium text-black">Wajib Beras</label>
+                                <input type="text" readonly :value="isFitrah ? wajibBeras + ' Kg' : '-'"
                                     class="w-full border border-black bg-gray-100 rounded px-3 py-2">
                             </div>
 

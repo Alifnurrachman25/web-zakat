@@ -65,14 +65,18 @@
                                     @endif
                                 </td>
                                 <td class="border border-black px-4 py-2">
-                                    @if ($p->infaq > 0)
-                                        @if ($p->metode_pembayaran === 'beras')
-                                            {{ rtrim(rtrim(number_format($p->infaq, 2), '0'), '.') }} kg
-                                        @else
-                                            Rp {{ number_format($p->infaq) }}
-                                        @endif
-                                    @else
+                                    @if ($p->zakatType?->name !== 'Zakat Fitrah')
                                         -
+                                    @else
+                                        @if ($p->infaq > 0)
+                                            @if ($p->metode_pembayaran === 'beras')
+                                                {{ rtrim(rtrim(number_format($p->infaq, 2), '0'), '.') }} kg
+                                            @else
+                                                Rp {{ number_format($p->infaq) }}
+                                            @endif
+                                        @else
+                                            -
+                                        @endif
                                     @endif
                                 </td>
                                 <td class="border border-black px-4 py-2 text-center">
