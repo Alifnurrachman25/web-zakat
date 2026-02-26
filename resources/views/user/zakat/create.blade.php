@@ -1,186 +1,186 @@
 <x-app-layout>
     <div class="min-h-screen flex items-center justify-center px-6 py-12">
-
         <div class="w-full max-w-6xl bg-white border border-black rounded-lg shadow p-6">
 
             {{-- Header --}}
             <div class="border-b border-black px-4 py-3 bg-gray-100 mb-6">
-                <h1 class="text-xl font-bold text-gray-800">
-                    Bayar Zakat
-                </h1>
+                <h1 class="text-xl font-bold">Bayar Zakat</h1>
                 <p class="text-sm text-gray-500">
                     Masukkan data muzakki dan pembayaran zakat
                 </p>
             </div>
 
-            {{-- Form --}}
-            <form method="POST" action="{{ route('user.zakat.store') }}" class="space-y-6" x-data="{
+            {{-- Error --}}
+            @if ($errors->any())
+                <div class="mb-4 p-3 bg-red-100 border border-red-400 text-red-700">
+                    <ul class="list-disc list-inside text-sm">
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+
+            <form method="POST" action="{{ route('user.zakat.store') }}" x-data="{
                 metode: '{{ old('metode_pembayaran', 'tunai') }}',
-                jumlah: {{ old('jumlah_jiwa', 1) }},
-                ricePrice: {{ old('rice_type_id') ? $riceTypes->firstWhere('id', old('rice_type_id'))->price : 48000 }},
-                getWajibBayar() {
-                    return this.metode === 'beras' ? this.ricePrice * this.jumlah : 48000 * this.jumlah;
-                }
-            }">
+                jumlah: {{ old('jumlah_jiwa', 0) }},
+                ricePrice: {{ old('rice_type_id') ? $riceTypes->firstWhere('id', old('rice_type_id'))?->price ?? 48000 : 48000 }},
+                get totalOrang() { return Number(this.jumlah) + 1 },
+                get wajibTunai() { return this.totalOrang * this.ricePrice },
+                get wajibBeras() { return this.totalOrang * 3 }
+            }" class="space-y-6">
 
                 @csrf
 
-                {{-- Flex Grid: 2 columns --}}
                 <div class="grid grid-cols-2 gap-6">
 
                     {{-- Nama Muzakki --}}
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Nama Muzakki</label>
+                        <label class="block text-sm font-medium">Nama Muzakki</label>
                         <input type="text" name="nama_muzakki" value="{{ old('nama_muzakki') }}"
-                            placeholder="Contoh: Ahmad"
-                            class="w-full border border-black rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-300">
-                        @error('nama_muzakki')
-                            <p class="text-red-500">{{ $message }}</p>
-                        @enderror
+                            class="w-full border border-black rounded px-3 py-2">
                     </div>
 
                     {{-- Phone --}}
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+                        <label class="block text-sm font-medium">Phone</label>
                         <input type="text" name="phone" value="{{ old('phone') }}"
-                            placeholder="Contoh: 08123456789"
-                            class="w-full border border-black rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-300">
-                        @error('phone')
-                            <p class="text-red-500">{{ $message }}</p>
-                        @enderror
+                            class="w-full border border-black rounded px-3 py-2">
                     </div>
 
                     {{-- Perumahan --}}
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Perumahan</label>
-                        <select name="perumahan_id"
-                            class="w-full border border-black rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-300">
-                            <option value="">-- Pilih Perumahan --</option>
+                        <label class="block text-sm font-medium">Perumahan</label>
+                        <select name="perumahan_id" class="w-full border border-black rounded px-3 py-2">
+                            <option value="">-- Pilih --</option>
                             @foreach ($perumahans as $p)
-                                <option value="{{ $p->id }}" @selected(old('perumahan_id') == $p->id)>{{ $p->name }}
+                                <option value="{{ $p->id }}" @selected(old('perumahan_id') == $p->id)>
+                                    {{ $p->name }}
                                 </option>
                             @endforeach
                         </select>
-                        @error('perumahan_id')
-                            <p class="text-red-500">{{ $message }}</p>
-                        @enderror
                     </div>
 
                     {{-- RT --}}
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">RT</label>
-                        <select name="rt_id"
-                            class="w-full border border-black rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-300">
-                            <option value="">-- Pilih RT --</option>
+                        <label class="block text-sm font-medium">RT</label>
+                        <select name="rt_id" class="w-full border border-black rounded px-3 py-2">
+                            <option value="">-- Pilih --</option>
                             @foreach ($rts as $r)
-                                <option value="{{ $r->id }}" @selected(old('rt_id') == $r->id)>{{ $r->name }}
+                                <option value="{{ $r->id }}" @selected(old('rt_id') == $r->id)>
+                                    {{ $r->name }}
                                 </option>
                             @endforeach
                         </select>
-                        @error('rt_id')
-                            <p class="text-red-500">{{ $message }}</p>
-                        @enderror
                     </div>
 
                     {{-- Blok --}}
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Blok</label>
-                        <input type="text" name="blok" value="{{ old('blok') }}" placeholder="Contoh: A1"
-                            class="w-full border border-black rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-300">
-                        @error('blok')
-                            <p class="text-red-500">{{ $message }}</p>
-                        @enderror
+                        <label class="block text-sm font-medium">Blok</label>
+                        <input type="text" name="blok" value="{{ old('blok') }}"
+                            class="w-full border border-black rounded px-3 py-2">
                     </div>
 
                     {{-- Jenis Zakat --}}
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Jenis Zakat</label>
-                        <select name="zakat_type_id"
-                            class="w-full border border-black rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-300">
-                            <option value="">-- Pilih Jenis Zakat --</option>
+                        <label class="block text-sm font-medium">Jenis Zakat</label>
+                        <select name="zakat_type_id" class="w-full border border-black rounded px-3 py-2">
+                            <option value="">-- Pilih --</option>
                             @foreach ($zakatTypes as $z)
-                                <option value="{{ $z->id }}" @selected(old('zakat_type_id') == $z->id)>{{ $z->name }}
+                                <option value="{{ $z->id }}" @selected(old('zakat_type_id') == $z->id)>
+                                    {{ $z->name }}
                                 </option>
                             @endforeach
                         </select>
-                        @error('zakat_type_id')
-                            <p class="text-red-500">{{ $message }}</p>
-                        @enderror
                     </div>
 
                     {{-- Jumlah Jiwa --}}
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Jumlah Jiwa</label>
-                        <input type="number" min="1" name="jumlah_jiwa" x-model.number="jumlah"
-                            value="{{ old('jumlah_jiwa', 1) }}"
-                            class="w-full border border-black rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-300">
-                        @error('jumlah_jiwa')
-                            <p class="text-red-500">{{ $message }}</p>
-                        @enderror
+                        <label class="block text-sm font-medium">Jumlah Tanggungan</label>
+                        <input type="number" min="0" name="jumlah_jiwa" x-model="jumlah"
+                            class="w-full border border-black rounded px-3 py-2">
+                        <p class="text-xs text-gray-500 mt-1">
+                            Total orang: <span x-text="totalOrang"></span>
+                        </p>
                     </div>
 
                     {{-- Metode Pembayaran --}}
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Metode Pembayaran</label>
+                        <label class="block text-sm font-medium">Metode Pembayaran</label>
                         <select name="metode_pembayaran" x-model="metode"
-                            class="w-full border border-black rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-300">
-                            <option value="">-- Pilih Metode --</option>
+                            class="w-full border border-black rounded px-3 py-2">
                             <option value="tunai">Tunai</option>
                             <option value="beras">Beras</option>
                         </select>
-                        @error('metode_pembayaran')
-                            <p class="text-red-500">{{ $message }}</p>
-                        @enderror
-
-                        {{-- Wajib Bayar --}}
-                        <div class="mt-2">
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Wajib Bayar (Rp)</label>
-                            <input type="text" readonly x-bind:value="getWajibBayar().toLocaleString('id-ID')"
-                                class="w-full border border-black rounded px-3 py-2 bg-gray-100 text-gray-700">
-                        </div>
-
-                        {{-- Input tunai --}}
-                        <div class="mt-2" x-show="metode=='tunai'">
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Bayar (Rp)</label>
-                            <input type="number" min="0" name="bayar" value="{{ old('bayar') }}"
-                                class="w-full border border-black rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-300">
-                        </div>
-
-                        {{-- Pilih Beras --}}
-                        <div class="mt-2" x-show="metode=='beras'">
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Jenis Beras</label>
-                            <select name="rice_type_id" x-model="riceTypeId"
-                                @change="ricePrice = $event.target.options[$event.target.selectedIndex].dataset.price"
-                                class="w-full border border-black rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-300">
-                                <option value="">-- Pilih Jenis Beras --</option>
-                                @foreach ($riceTypes as $r)
-                                    <option value="{{ $r->id }}" data-price="{{ $r->price }}"
-                                        @selected(old('rice_type_id') == $r->id)>
-                                        {{ $r->name }} (Rp {{ number_format($r->price) }} / kg)
-                                    </option>
-                                @endforeach
-                            </select>
-                        </div>
                     </div>
+
+                    {{-- ================= TUNAI ================= --}}
+                    <template x-if="metode === 'tunai'">
+                        <div class="col-span-2 grid grid-cols-2 gap-6">
+
+                            <div>
+                                <label class="block text-sm font-medium">Jenis Beras</label>
+                                <select name="rice_type_id"
+                                    @change="ricePrice = $event.target.options[$event.target.selectedIndex].dataset.price"
+                                    class="w-full border border-black rounded px-3 py-2">
+                                    <option value="">-- Pilih --</option>
+                                    @foreach ($riceTypes as $r)
+                                        <option value="{{ $r->id }}" data-price="{{ $r->price }}"
+                                            @selected(old('rice_type_id') == $r->id)>
+                                            {{ $r->name }} (Rp {{ number_format($r->price) }})
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium">Bayar (Rp)</label>
+                                <input type="number" min="0" name="bayar" value="{{ old('bayar') }}"
+                                    class="w-full border border-black rounded px-3 py-2">
+                            </div>
+
+                            <div class="col-span-2">
+                                <label class="block text-sm font-medium">Wajib Bayar</label>
+                                <input type="text" readonly :value="wajibTunai.toLocaleString('id-ID')"
+                                    class="w-full border border-black bg-gray-100 rounded px-3 py-2">
+                            </div>
+
+                        </div>
+                    </template>
+
+                    {{-- ================= BERAS ================= --}}
+                    <template x-if="metode === 'beras'">
+                        <div class="col-span-2 grid grid-cols-2 gap-6">
+
+                            <div>
+                                <label class="block text-sm font-medium">Jumlah Beras (Kg)</label>
+                                <input type="number" step="0.1" min="0" name="beras_kg"
+                                    value="{{ old('beras_kg') }}" class="w-full border border-black rounded px-3 py-2">
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium">Wajib Beras</label>
+                                <input type="text" readonly :value="wajibBeras + ' Kg'"
+                                    class="w-full border border-black bg-gray-100 rounded px-3 py-2">
+                            </div>
+
+                        </div>
+                    </template>
 
                 </div>
 
                 {{-- Actions --}}
                 <div class="flex justify-end gap-3 pt-4 border-t border-black">
-                    <a href="{{ route('user.zakat.index') }}"
-                        class="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300 text-gray-700">
+                    <a href="{{ route('user.zakat.index') }}" class="px-4 py-2 bg-gray-200 rounded">
                         Batal
                     </a>
-
-                    <button type="submit" class="px-4 py-2 rounded bg-green-500 hover:bg-green-700 text-black">
+                    <button type="submit" class="px-4 py-2 bg-green-500 text-black rounded">
                         Bayar Zakat
                     </button>
                 </div>
 
             </form>
-
         </div>
-
     </div>
 
     <script src="//unpkg.com/alpinejs" defer></script>

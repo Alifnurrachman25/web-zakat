@@ -41,20 +41,47 @@ class ZakatPaymentController extends Controller
             'nama_muzakki' => 'required|string|max:255',
             'perumahan_id' => 'required|exists:perumahans,id',
             'rt_id' => 'required|exists:rts,id',
-            'blok' => 'nullable|string|max:50',
-            'phone' => 'nullable|string|max:20',
             'zakat_type_id' => 'required|exists:zakat_types,id',
-            'rice_type_id' => 'nullable|exists:rice_types,id',
-            'jumlah_jiwa' => 'required|integer|min:1',
+            'jumlah_jiwa' => 'required|integer|min:0',
             'metode_pembayaran' => 'required|in:tunai,beras',
-            'bayar' => 'required|integer|min:0',
+
+            'rice_type_id' => 'required_if:metode_pembayaran,tunai|exists:rice_types,id',
+            'bayar' => 'required_if:metode_pembayaran,tunai|integer|min:0',
+            'beras_kg' => 'required_if:metode_pembayaran,beras|numeric|min:0',
         ]);
 
-        $wajib_bayar = $request->metode_pembayaran === 'beras' && $request->rice_type_id
-            ? RiceType::find($request->rice_type_id)->price * $request->jumlah_jiwa
-            : 48000 * $request->jumlah_jiwa;
+        // ✅ muzakki + tanggungan
+        $jumlahJiwa = $request->jumlah_jiwa + 1;
 
-        $infaq = max(0, $request->bayar - $wajib_bayar);
+        $bayar = 0;
+        $infaq = 0;
+
+        if ($request->metode_pembayaran === 'tunai') {
+            $rice = RiceType::findOrFail($request->rice_type_id);
+            $wajibBayar = $rice->price * $jumlahJiwa;
+
+            $bayar = $request->bayar;
+            if ($request->bayar < $wajibBayar) {
+                return back()
+                    ->withErrors([
+                        'bayar' => 'Nominal bayar tidak boleh kurang dari kewajiban zakat.'
+                    ])
+                    ->withInput();
+            }
+            $infaq = max(0, $bayar - $wajibBayar);
+        } else {
+            // pembayaran beras
+            $wajibKg = $jumlahJiwa * 3;
+            if ($request->beras_kg < $wajibKg) {
+                return back()
+                    ->withErrors([
+                        'beras_kg' => 'Jumlah beras tidak boleh kurang dari kewajiban zakat.'
+                    ])
+                    ->withInput();
+            }
+            $bayar = $wajibKg; // simpan kewajiban kg
+            $infaq = max(0, $request->beras_kg - $wajibKg);
+        }
 
         ZakatPayment::create([
             'user_id' => auth()->id(),
@@ -64,14 +91,18 @@ class ZakatPaymentController extends Controller
             'blok' => $request->blok,
             'phone' => $request->phone,
             'zakat_type_id' => $request->zakat_type_id,
-            'rice_type_id' => $request->rice_type_id,
-            'jumlah_jiwa' => $request->jumlah_jiwa,
+            'rice_type_id' => $request->metode_pembayaran === 'tunai'
+                ? $request->rice_type_id
+                : null,
+            'jumlah_jiwa' => $jumlahJiwa,
             'metode_pembayaran' => $request->metode_pembayaran,
-            'bayar' => $request->bayar,
+            'bayar' => $bayar,
             'infaq' => $infaq,
         ]);
 
-        return redirect()->route('user.zakat.index')->with('success', 'Pembayaran berhasil disimpan');
+        return redirect()
+            ->route('user.zakat.index')
+            ->with('success', 'Pembayaran berhasil disimpan');
     }
 
     // Edit
@@ -88,6 +119,10 @@ class ZakatPaymentController extends Controller
     // Update
     public function update(Request $request, ZakatPayment $zakat)
     {
+        if ($zakat->user_id !== auth()->id()) {
+            abort(403);
+        }
+
         $request->validate([
             'nama_muzakki' => 'required|string|max:255',
             'perumahan_id' => 'required|exists:perumahans,id',
@@ -95,17 +130,40 @@ class ZakatPaymentController extends Controller
             'blok' => 'nullable|string|max:50',
             'phone' => 'nullable|string|max:20',
             'zakat_type_id' => 'required|exists:zakat_types,id',
-            'rice_type_id' => 'nullable|exists:rice_types,id',
-            'jumlah_jiwa' => 'required|integer|min:1',
+            'jumlah_jiwa' => 'required|integer|min:1', // TOTAL ORANG
             'metode_pembayaran' => 'required|in:tunai,beras',
-            'bayar' => 'required|integer|min:0',
+            'rice_type_id' => 'required_if:metode_pembayaran,tunai|exists:rice_types,id',
+            'bayar' => 'required_if:metode_pembayaran,tunai|integer|min:0',
+            'beras_kg' => 'required_if:metode_pembayaran,beras|numeric|min:0',
         ]);
 
-        $wajib_bayar = $request->metode_pembayaran === 'beras' && $request->rice_type_id
-            ? RiceType::find($request->rice_type_id)->price * $request->jumlah_jiwa
-            : 48000 * $request->jumlah_jiwa;
+        // ✅ LANGSUNG PAKAI NILAI DARI FORM
+        $totalOrang = $request->jumlah_jiwa;
 
-        $infaq = max(0, $request->bayar - $wajib_bayar);
+        if ($request->metode_pembayaran === 'tunai') {
+            $rice = RiceType::findOrFail($request->rice_type_id);
+            $wajibBayar = $rice->price * $totalOrang;
+            $bayar = $request->bayar;
+            if ($bayar < $wajibBayar) {
+                return back()
+                    ->withErrors([
+                        'bayar' => 'Nominal bayar tidak boleh kurang dari kewajiban zakat.'
+                    ])
+                    ->withInput();
+            }
+            $infaq = max(0, $bayar - $wajibBayar);
+        } else {
+            $wajibKg = $totalOrang * 3;
+            if ($request->beras_kg < $wajibKg) {
+                return back()
+                    ->withErrors([
+                        'beras_kg' => 'Jumlah beras tidak boleh kurang dari kewajiban zakat.'
+                    ])
+                    ->withInput();
+            }
+            $bayar = $wajibKg;
+            $infaq = max(0, $request->beras_kg - $wajibKg);
+        }
 
         $zakat->update([
             'nama_muzakki' => $request->nama_muzakki,
@@ -114,14 +172,17 @@ class ZakatPaymentController extends Controller
             'blok' => $request->blok,
             'phone' => $request->phone,
             'zakat_type_id' => $request->zakat_type_id,
-            'rice_type_id' => $request->rice_type_id,
-            'jumlah_jiwa' => $request->jumlah_jiwa,
+            'rice_type_id' => $request->metode_pembayaran === 'tunai'
+                ? $request->rice_type_id
+                : null,
+            'jumlah_jiwa' => $totalOrang,
             'metode_pembayaran' => $request->metode_pembayaran,
-            'bayar' => $request->bayar,
+            'bayar' => $bayar,
             'infaq' => $infaq,
         ]);
 
-        return redirect()->route('user.zakat.index')->with('success', 'Pembayaran berhasil diperbarui');
+        return redirect()->route('user.zakat.index')
+            ->with('success', 'Data zakat berhasil diperbarui');
     }
 
     // Destroy

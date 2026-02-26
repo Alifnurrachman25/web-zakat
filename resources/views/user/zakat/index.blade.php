@@ -57,8 +57,24 @@
                                 <td class="border border-black px-4 py-2">{{ $p->phone ?? '-' }}</td>
                                 <td class="border border-black px-4 py-2">{{ $p->zakatType?->name ?? '-' }}</td>
                                 <td class="border border-black px-4 py-2">{{ ucfirst($p->metode_pembayaran) }}</td>
-                                <td class="border border-black px-4 py-2">Rp {{ number_format($p->bayar) }}</td>
-                                <td class="border border-black px-4 py-2">Rp {{ number_format($p->infaq) }}</td>
+                                <td class="border border-black px-4 py-2">
+                                    @if ($p->metode_pembayaran === 'beras')
+                                        {{ rtrim(rtrim(number_format($p->bayar, 2), '0'), '.') }} kg
+                                    @else
+                                        Rp {{ number_format($p->bayar) }}
+                                    @endif
+                                </td>
+                                <td class="border border-black px-4 py-2">
+                                    @if ($p->infaq > 0)
+                                        @if ($p->metode_pembayaran === 'beras')
+                                            {{ rtrim(rtrim(number_format($p->infaq, 2), '0'), '.') }} kg
+                                        @else
+                                            Rp {{ number_format($p->infaq) }}
+                                        @endif
+                                    @else
+                                        -
+                                    @endif
+                                </td>
                                 <td class="border border-black px-4 py-2 text-center">
                                     <div class="flex justify-center gap-2">
                                         <a href="{{ route('user.zakat.edit', $p) }}"
