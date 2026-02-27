@@ -31,20 +31,31 @@ class InfaqController extends Controller
             $query->whereDate('tanggal', $request->tanggal);
         }
 
-        if ($request->bulan) {
-            $query->whereMonth('tanggal', date('m', strtotime($request->bulan)))
-                ->whereYear('tanggal', date('Y', strtotime($request->bulan)));
-        }
-
         $infaqs = $query->latest('tanggal')->paginate(10);
 
-        // AJAX handler
-        if ($request->ajax()) {
-            return view('user.infaq.partials.table', compact('infaqs'))->render();
-        }
+        // 🔥 TOTAL MANUAL (semua manual dijumlah dulu)
+        $totalManual = Infaq::where('user_id', auth()->id())
+            ->when($request->tanggal, function ($q) use ($request) {
+                $q->whereDate('tanggal', $request->tanggal);
+            })
+            ->sum('pemasukan_manual');
 
-        // 🔥 INI YANG KURANG
-        return view('user.infaq.index', compact('infaqs'));
+        // 🔥 TOTAL DARI ZAKAT (hanya sekali per tanggal)
+        $totalDariZakat = ZakatPayment::where('user_id', auth()->id())
+            ->when($request->tanggal, function ($q) use ($request) {
+                $q->whereDate('created_at', $request->tanggal);
+            })
+            ->sum('infaq');
+
+        // 🔥 TOTAL AKHIR
+        $grandTotal = $totalManual + $totalDariZakat;
+
+        return view('user.infaq.index', compact(
+            'infaqs',
+            'totalManual',
+            'totalDariZakat',
+            'grandTotal'
+        ));
     }
 
     /**

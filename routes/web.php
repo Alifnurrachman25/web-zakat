@@ -4,12 +4,20 @@ use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\RiceTypeController;
 use App\Http\Controllers\Admin\ZakatTypeController;
-use App\Http\Controllers\DashboardController;
+
+
+use App\Exports\LaporanLengkapExport;
+use Maatwebsite\Excel\Facades\Excel;
 
 
 Route::get('/', function () {
     return view('welcome');
 });
+
+Route::get('/export-lengkap', function () {
+    return Excel::download(new LaporanLengkapExport, 'laporan_lengkap_zakat.xlsx');
+})->name('export.lengkap');
+
 
 // Route::get('/dashboard', function () {
 //     return view('dashboard');

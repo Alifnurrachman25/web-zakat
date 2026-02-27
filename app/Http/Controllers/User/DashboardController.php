@@ -15,6 +15,7 @@ class DashboardController extends Controller
 {
     public function index()
     {
+        $userId = auth()->id();
         $today = Carbon::today();
 
         // ========================
@@ -30,10 +31,20 @@ class DashboardController extends Controller
         // INFAQ
         // ========================
 
-        $infaqHariIni = Infaq::whereDate('created_at', $today)
-            ->sum('total_pemasukan');
+        // 🔥 Infaq Manual Hari Ini
+        $infaqManualHariIni = Infaq::where('user_id', $userId)
+            ->whereDate('tanggal', $today)
+            ->sum('pemasukan_manual');
 
-        $infaqTotal = Infaq::sum('total_pemasukan');
+        // 🔥 Infaq Dari Zakat Hari Ini
+        $infaqDariZakatHariIni = ZakatPayment::where('user_id', $userId)
+            ->whereDate('created_at', $today)
+            ->sum('infaq');
+
+
+        $infaqHariIni = $infaqManualHariIni;
+        $infaqTotal = $grandTotal = Infaq::where('user_id', $userId)->sum('pemasukan_manual') +
+            ZakatPayment::where('user_id', $userId)->sum('infaq');
 
         // ========================
         // JUMLAH PENERIMA

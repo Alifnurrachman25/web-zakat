@@ -5,9 +5,9 @@
             <thead class="bg-gray-200 border-b border-black">
                 <tr>
                     <th class="px-3 py-2 text-left border border-black">Tanggal</th>
-                    <th class="px-3 py-2 text-left border border-black">Manual</th>
-                    <th class="px-3 py-2 text-left border border-black">Dari Zakat</th>
-                    <th class="px-3 py-2 text-left border border-black">Total</th>
+                    <th class="px-3 py-2 text-left border border-black">Infaq</th>
+
+
                     <th class="px-3 py-2 text-left border border-black">Imam</th>
                     <th class="px-3 py-2 text-left border border-black">Kultum</th>
                     <th class="px-3 py-2 text-left border border-black">Bilal</th>
@@ -24,12 +24,8 @@
                         <td class="px-3 py-2 border border-black">
                             Rp {{ number_format($i->pemasukan_manual) }}
                         </td>
-                        <td class="px-3 py-2 border border-black">
-                            Rp {{ number_format($i->pemasukan_dari_zakat) }}
-                        </td>
-                        <td class="px-3 py-2 font-semibold border border-black">
-                            Rp {{ number_format($i->total_pemasukan) }}
-                        </td>
+
+
                         <td class="px-3 py-2 border border-black">{{ $i->imam }}</td>
                         <td class="px-3 py-2 border border-black">{{ $i->kultum }}</td>
                         <td class="px-3 py-2 border border-black">{{ $i->bilal }}</td>

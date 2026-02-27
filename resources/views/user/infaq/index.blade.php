@@ -66,6 +66,33 @@
             @include('user.infaq.partials.table', ['infaqs' => $infaqs])
         </div>
 
+        <div class="flex justify-end mt-6">
+            <div class="p-6 bg-white border rounded-lg shadow w-96">
+                <div class="space-y-2 text-right">
+                    <p class="text-gray-600">
+                        Total Infaq Manual :
+                        <span class="font-semibold">
+                            Rp {{ number_format($totalManual) }}
+                        </span>
+                    </p>
+
+                    <p class="text-gray-600">
+                        Total Infaq Dari Zakat :
+                        <span class="font-semibold">
+                            Rp {{ number_format($totalDariZakat) }}
+                        </span>
+                    </p>
+
+                    <hr>
+
+                    <p class="text-lg font-bold text-green-600">
+                        Total Infaq :
+                        Rp {{ number_format($grandTotal) }}
+                    </p>
+                </div>
+            </div>
+        </div>
+
     </div>
 
 </x-app-layout>

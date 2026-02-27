@@ -1,14 +1,23 @@
 <x-app-layout>
     <div class="px-6 py-8 mx-auto max-w-7xl">
 
-        {{-- Header --}}
-        <div class="mb-8">
-            <h1 class="text-3xl font-bold text-white">
-                Dashboard
-            </h1>
-            <p class="text-white/80">
-                Selamat datang, <strong>{{ auth()->user()->name }}</strong>
-            </p>
+        {{-- Header + Export --}}
+        <div class="flex flex-col gap-4 mb-8 md:flex-row md:items-center md:justify-between">
+
+            <div>
+                <h1 class="text-3xl font-bold text-white">
+                    Dashboard
+                </h1>
+                <p class="text-white/80">
+                    Selamat datang, <strong>{{ auth()->user()->name }}</strong>
+                </p>
+            </div>
+
+            <a href="{{ route('export.lengkap') }}"
+                class="inline-flex items-center px-4 py-2 text-sm font-medium text-white transition rounded-lg shadow bg-emerald-600 hover:bg-emerald-700">
+                📊 Export Laporan Lengkap
+            </a>
+
         </div>
 
         {{-- Statistik --}}
@@ -63,6 +72,7 @@
             </div>
 
         </div>
+
 
         {{-- Logout --}}
         <div class="mt-10">
