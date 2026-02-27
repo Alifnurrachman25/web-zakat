@@ -1,10 +1,10 @@
 <x-app-layout>
-    <div class="max-w-7xl mx-auto px-8 py-6">
+    <div class="px-2 py-6 mx-auto max-w-7xl md:px-2" x-data="filterHandler()">
 
         {{-- Header --}}
-        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+        <div class="flex flex-col gap-4 mb-6 sm:flex-row sm:items-center sm:justify-between">
             <div>
-                <h1 class="text-4xl md:text-5xl font-bold text-white text-center">
+                <h1 class="text-4xl font-bold text-center text-white md:text-5xl">
                     Riwayat Bayar Zakat
                 </h1>
                 <p class="text-sm text-white">
@@ -13,101 +13,89 @@
             </div>
 
             <a href="{{ route('user.zakat.create') }}"
-                class="inline-flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg shadow transition">
+                class="inline-flex items-center gap-2 px-4 py-2 text-white transition bg-green-600 rounded-lg shadow hover:bg-green-700">
                 + Bayar Zakat
             </a>
         </div>
 
-        {{-- Alert --}}
-        @if (session('success'))
-            <div class="mb-4 rounded-lg bg-green-100 border border-green-300 text-green-700 px-4 py-3">
-                {{ session('success') }}
-            </div>
-        @endif
+        {{-- FILTER SECTION --}}
+        <div class="grid grid-cols-1 gap-3 mb-6 md:grid-cols-4">
 
-        {{-- Table Card --}}
-        <div class="bg-white rounded-lg shadow overflow-hidden border border-black">
-            <div class="overflow-x-auto">
-                <table class="w-full border-collapse text-sm">
+            {{-- Search --}}
+            <input type="text" x-model="search" @input.debounce.500ms="fetchData()"
+                placeholder="Cari nama / phone / blok..." class="px-3 py-2 border border-black rounded">
 
-                    {{-- Head --}}
-                    <thead class="bg-gray-200 border-b border-black">
-                        <tr>
-                            <th class="border border-black px-4 py-2 text-left">Nama</th>
-                            <th class="border border-black px-4 py-2 text-left">Perumahan</th>
-                            <th class="border border-black px-4 py-2 text-left">RT</th>
-                            <th class="border border-black px-4 py-2 text-left">Blok</th>
-                            <th class="border border-black px-4 py-2 text-left">Phone</th>
-                            <th class="border border-black px-4 py-2 text-left">Jenis Zakat</th>
-                            <th class="border border-black px-4 py-2 text-left">Metode</th>
-                            <th class="border border-black px-4 py-2 text-left">Total Bayar</th>
-                            <th class="border border-black px-4 py-2 text-left">Infaq</th>
-                            <th class="border border-black px-4 py-2 text-center">Aksi</th>
-                        </tr>
-                    </thead>
+            {{-- Filter Perumahan --}}
+            <select x-model="perumahan" @change="fetchData" class="px-3 py-2 border border-black rounded">
+                <option value="">Semua Perumahan</option>
+                @foreach ($perumahans as $p)
+                    <option value="{{ $p->id }}">{{ $p->name }}</option>
+                @endforeach
+            </select>
 
-                    {{-- Body --}}
-                    <tbody>
-                        @forelse($payments as $p)
-                            <tr class="{{ $loop->odd ? 'bg-white' : 'bg-gray-100' }}">
-                                <td class="border border-black px-4 py-2">{{ $p->nama_muzakki }}</td>
-                                <td class="border border-black px-4 py-2">{{ $p->perumahan?->name ?? '-' }}</td>
-                                <td class="border border-black px-4 py-2">{{ $p->rt?->name ?? '-' }}</td>
-                                <td class="border border-black px-4 py-2">{{ $p->blok ?? '-' }}</td>
-                                <td class="border border-black px-4 py-2">{{ $p->phone ?? '-' }}</td>
-                                <td class="border border-black px-4 py-2">{{ $p->zakatType?->name ?? '-' }}</td>
-                                <td class="border border-black px-4 py-2">{{ ucfirst($p->metode_pembayaran) }}</td>
-                                <td class="border border-black px-4 py-2">
-                                    @if ($p->metode_pembayaran === 'beras')
-                                        {{ rtrim(rtrim(number_format($p->bayar, 2), '0'), '.') }} kg
-                                    @else
-                                        Rp {{ number_format($p->bayar) }}
-                                    @endif
-                                </td>
-                                <td class="border border-black px-4 py-2">
-                                    @if ($p->zakatType?->name !== 'Zakat Fitrah')
-                                        -
-                                    @else
-                                        @if ($p->infaq > 0)
-                                            @if ($p->metode_pembayaran === 'beras')
-                                                {{ rtrim(rtrim(number_format($p->infaq, 2), '0'), '.') }} kg
-                                            @else
-                                                Rp {{ number_format($p->infaq) }}
-                                            @endif
-                                        @else
-                                            -
-                                        @endif
-                                    @endif
-                                </td>
-                                <td class="border border-black px-4 py-2 text-center">
-                                    <div class="flex justify-center gap-2">
-                                        <a href="{{ route('user.zakat.edit', $p) }}"
-                                            class="px-3 py-1 text-blue-700 bg-blue-100 rounded hover:bg-blue-200">
-                                            Edit
-                                        </a>
-                                        <form action="{{ route('user.zakat.destroy', $p) }}" method="POST">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" onclick="return confirm('Yakin ingin menghapus?')"
-                                                class="px-3 py-1 rounded bg-red-100 hover:bg-red-200 !text-red-700 hover:!text-red-800 focus:outline-none focus:ring-2 focus:ring-red-300">
-                                                Hapus
-                                            </button>
-                                        </form>
-                                    </div>
-                                </td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="10" class="border border-black px-4 py-6 text-center text-gray-500">
-                                    Belum ada pembayaran
-                                </td>
-                            </tr>
-                        @endforelse
-                    </tbody>
+            {{-- Filter RT --}}
+            <select x-model="rt" @change="fetchData" class="px-3 py-2 border border-black rounded">
+                <option value="">Semua RT</option>
+                @foreach ($rts as $r)
+                    <option value="{{ $r->id }}">{{ $r->name }}</option>
+                @endforeach
+            </select>
 
-                </table>
-            </div>
+            {{-- Filter Jenis Zakat --}}
+            <select x-model="zakat" @change="fetchData" class="px-3 py-2 border border-black rounded">
+                <option value="">Semua Jenis Zakat</option>
+                @foreach ($zakatTypes as $z)
+                    <option value="{{ $z->id }}">{{ $z->name }}</option>
+                @endforeach
+            </select>
+        </div>
+
+        {{-- Table --}}
+        <div x-html="tableData">
+            @include('user.zakat.partials.table', ['payments' => $payments])
         </div>
 
     </div>
+
+    <script>
+        function filterHandler() {
+            return {
+                search: '',
+                perumahan: '',
+                rt: '',
+                zakat: '',
+                tableData: '',
+
+                init() {
+                    this.tableData = this.$el.querySelector('[x-html]').innerHTML;
+                },
+
+                fetchData(pageUrl = null) {
+
+                    let baseUrl = `{{ route('user.zakat.index') }}`;
+
+                    let url = typeof pageUrl === 'string' ?
+                        pageUrl :
+                        baseUrl;
+
+                    let params = new URLSearchParams({
+                        search: this.search,
+                        perumahan: this.perumahan,
+                        rt: this.rt,
+                        zakat: this.zakat
+                    });
+
+                    fetch(url + '?' + params.toString(), {
+                            headers: {
+                                'X-Requested-With': 'XMLHttpRequest'
+                            }
+                        })
+                        .then(res => res.text())
+                        .then(html => {
+                            this.tableData = html;
+                        });
+                }
+            }
+        }
+    </script>
 </x-app-layout>

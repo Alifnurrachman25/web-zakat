@@ -17,7 +17,6 @@ return new class extends Migration
             $table->string('perumahan');
             $table->string('blok');
             $table->string('rt');
-            $table->string('category'); // fakir, miskin, amil, dll
             $table->text('notes')->nullable();
             $table->timestamps();
         });
@@ -28,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('penerima_zakats');
+        Schema::dropIfExists('penerima_zakat');
     }
 };

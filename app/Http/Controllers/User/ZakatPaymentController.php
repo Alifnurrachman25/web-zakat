@@ -13,14 +13,49 @@ use App\Models\Rt;
 class ZakatPaymentController extends Controller
 {
     // Index
-    public function index()
+    public function index(Request $request)
     {
+        $search = $request->search;
+        $perumahan = $request->perumahan;
+        $rt = $request->rt;
+        $zakat = $request->zakat;
+
         $payments = ZakatPayment::with('zakatType', 'riceType', 'perumahan', 'rt')
             ->where('user_id', auth()->id())
-            ->latest()
-            ->get();
 
-        return view('user.zakat.index', compact('payments'));
+            ->when($search, function ($query) use ($search) {
+                $query->where(function ($q) use ($search) {
+                    $q->where('nama_muzakki', 'like', "%{$search}%")
+                        ->orWhere('phone', 'like', "%{$search}%")
+                        ->orWhere('blok', 'like', "%{$search}%")
+                        ->orWhereHas('zakatType', function ($z) use ($search) {
+                            $z->where('name', 'like', "%{$search}%");
+                        });
+                });
+            })
+
+            ->when($perumahan, fn($q) => $q->where('perumahan_id', $perumahan))
+            ->when($rt, fn($q) => $q->where('rt_id', $rt))
+            ->when($zakat, fn($q) => $q->where('zakat_type_id', $zakat))
+
+            ->latest()
+            ->paginate(10)
+            ->withQueryString();
+
+        if ($request->ajax()) {
+            return view('user.zakat.partials.table', compact('payments'))->render();
+        }
+
+        $perumahans = Perumahan::all();
+        $rts = Rt::all();
+        $zakatTypes = ZakatType::all();
+
+        return view('user.zakat.index', compact(
+            'payments',
+            'perumahans',
+            'rts',
+            'zakatTypes'
+        ));
     }
 
     // Create

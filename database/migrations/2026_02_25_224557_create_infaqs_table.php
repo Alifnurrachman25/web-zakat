@@ -11,12 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('infaq', function (Blueprint $table) {
+        Schema::create('infaqs', function (Blueprint $table) {
             $table->id();
             $table->date('tanggal');
             $table->integer('pemasukan_manual')->default(0);
             $table->integer('pemasukan_dari_zakat')->default(0);
-            $table->integer('total_pemasukan');
+            $table->integer('total_pemasukan')->default(0);
             $table->string('imam');
             $table->string('kultum');
             $table->string('bilal');

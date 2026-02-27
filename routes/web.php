@@ -35,6 +35,14 @@ Route::middleware(['auth'])->prefix('user')->name('user.')->group(function () {
     Route::resource('zakat', App\Http\Controllers\User\ZakatPaymentController::class);
 });
 
+Route::middleware(['auth'])->prefix('user')->name('user.')->group(function () {
+    Route::resource('infaq', \App\Http\Controllers\User\InfaqController::class);
+});
+
+Route::middleware(['auth'])->prefix('user')->name('user.')->group(function () {
+    Route::resource('penerima-zakat', \App\Http\Controllers\User\PenerimaZakatController::class);
+});
+
 // Route::prefix('admin')->middleware(['auth', 'admin'])->group(function () {
 //     Route::resource('zakat-types', App\Http\Controllers\Admin\ZakatTypeController::class);
 // });

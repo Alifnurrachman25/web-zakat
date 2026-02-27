@@ -54,4 +54,9 @@ class ZakatPayment extends Model
     {
         return $this->belongsTo(Rt::class);
     }
+
+    public function infaqHarian()
+    {
+        return $this->belongsTo(Infaq::class);
+    }
 }
