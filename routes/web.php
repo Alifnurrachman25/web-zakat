@@ -11,7 +11,7 @@ use Maatwebsite\Excel\Facades\Excel;
 
 
 Route::get('/', function () {
-    return view('welcome');
+    return view('landing');
 });
 
 Route::get('/export-lengkap', function () {
