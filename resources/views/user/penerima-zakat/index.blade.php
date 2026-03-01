@@ -24,6 +24,7 @@
         <form method="GET" action="{{ route('user.penerima-zakat.index') }}" class="mb-6">
             <div class="grid items-end grid-cols-1 gap-4 md:grid-cols-4">
 
+                {{-- Search --}}
                 <div class="flex flex-col">
                     <label class="mb-1 text-sm font-semibold text-white">
                         Pencarian
@@ -33,9 +34,45 @@
                         class="px-3 py-2 bg-white border border-black rounded focus:ring-2 focus:ring-blue-500">
                 </div>
 
-                <div class="hidden md:block"></div>
-                <div class="hidden md:block"></div>
+                {{-- Filter Perumahan --}}
+                <div class="flex flex-col">
+                    <label class="mb-1 text-sm font-semibold text-white">
+                        Perumahan
+                    </label>
+                    <select name="perumahan"
+                        class="px-3 py-2 bg-white border border-black rounded focus:ring-2 focus:ring-blue-500">
 
+                        <option value="">Semua</option>
+
+                        @foreach ($perumahans as $perumahan)
+                            <option value="{{ $perumahan->name }}"
+                                {{ request('perumahan') == $perumahan->name ? 'selected' : '' }}>
+                                {{ $perumahan->name }}
+                            </option>
+                        @endforeach
+
+                    </select>
+                </div>
+
+                {{-- Filter RT --}}
+                <div class="flex flex-col">
+                    <label class="mb-1 text-sm font-semibold text-white">
+                        RT
+                    </label>
+                    <select name="rt" class="px-3 py-2 bg-white border border-black rounded">
+
+                        <option value="">Semua</option>
+
+                        @foreach ($rts as $rt)
+                            <option value="{{ $rt->name }}" {{ request('rt') == $rt->name ? 'selected' : '' }}>
+                                {{ $rt->name }}
+                            </option>
+                        @endforeach
+
+                    </select>
+                </div>
+
+                {{-- Button --}}
                 <div class="flex gap-2">
                     <button type="submit"
                         class="w-full px-4 py-2 text-white transition bg-blue-600 rounded hover:bg-blue-700">
@@ -51,6 +88,20 @@
             </div>
         </form>
 
+        <div class="mb-6">
+            <div class="p-6 bg-white border border-black rounded-lg shadow">
+
+                <p class="text-sm text-gray-500">
+                    Total Penerima Zakat
+                </p>
+
+                <h2 class="mt-1 text-2xl font-bold text-blue-600">
+                    {{ $filterLabel }} = {{ $data->total() }} Orang
+                </h2>
+
+            </div>
+        </div>
+
         {{-- Table --}}
         <div class="overflow-hidden bg-white border border-black rounded-lg shadow">
             <table class="min-w-full text-sm text-left border-collapse">
@@ -60,7 +111,7 @@
                         <th class="px-4 py-3 text-left border border-black">Perumahan</th>
                         <th class="px-4 py-3 text-left border border-black">Blok</th>
                         <th class="px-4 py-3 text-left border border-black">RT</th>
-                        <th class="px-4 py-3 text-left border border-black">Catatan</th>
+                        <th class="px-4 py-3 text-left border border-black">Kategori</th>
                         <th class="px-4 py-3 text-center border border-black">Aksi</th>
                     </tr>
                 </thead>
@@ -71,7 +122,7 @@
                             <td class="px-4 py-2 border border-black">{{ $item->perumahan }}</td>
                             <td class="px-4 py-2 border border-black">{{ $item->blok }}</td>
                             <td class="px-4 py-2 border border-black">{{ $item->rt }}</td>
-                            <td class="px-4 py-2 border border-black">{{ $item->notes }}</td>
+                            <td class="px-4 py-2 border border-black">{{ $item->kategori }}</td>
                             <td class="px-4 py-2 text-center border border-black">
                                 <div class="flex justify-center gap-2">
 
@@ -102,6 +153,16 @@
                 </tbody>
             </table>
         </div>
+
+        {{-- <div class="px-4 py-3 bg-gray-100 border-t border-black">
+            <p class="text-sm font-semibold text-gray-800">
+                Total Penerima Zakat :
+                <span class="px-3 py-1 text-white bg-blue-600 rounded">
+                    {{ $data->total() }}
+                </span>
+                <span class="px-2">Orang</span>
+            </p>
+        </div> --}}
 
         {{-- Pagination --}}
         <div class="mt-4">

@@ -45,6 +45,7 @@ class InfaqController extends Controller
             ->when($request->tanggal, function ($q) use ($request) {
                 $q->whereDate('created_at', $request->tanggal);
             })
+            ->where('metode_pembayaran', 'tunai')
             ->sum('infaq');
 
         // 🔥 TOTAL AKHIR

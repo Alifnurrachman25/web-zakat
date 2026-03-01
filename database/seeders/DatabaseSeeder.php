@@ -24,6 +24,10 @@ class DatabaseSeeder extends Seeder
             ZakatTypeSeeder::class,
             PerumahanSeeder::class,
             RTSeeder::class,
+            KategoriPenerimaSeeder::class,
+            // InfaqSeeder::class,
+            // ZakatPaymentSeeder::class,
+            PenerimaZakatSeeder::class,
         ]);
 
         User::factory()->create([

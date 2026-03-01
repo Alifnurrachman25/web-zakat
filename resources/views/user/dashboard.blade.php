@@ -23,50 +23,74 @@
         {{-- Statistik --}}
         <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
 
-            {{-- Zakat Hari Ini --}}
-            <div class="p-6 bg-white border border-black rounded-lg shadow">
+            {{-- ZAKAT HARI INI --}}
+            <div class="p-6 bg-white border border-black shadow rounded-xl">
                 <p class="text-sm text-gray-500">Zakat Hari Ini</p>
-                <h2 class="mt-2 text-2xl font-bold text-green-600">
-                    Rp {{ number_format($zakatHariIni) }}
-                </h2>
+
+                <div class="mt-3 space-y-1">
+                    <p class="text-lg font-bold text-green-600">
+                        Rp {{ number_format($zakatHariIniTunai, 0, ',', '.') }}
+                    </p>
+                    <p class="text-sm text-gray-600">
+                        {{ number_format($zakatHariIniBeras, 0, ',', '.') }} Kg Beras
+                    </p>
+                </div>
             </div>
 
-            {{-- Infaq Hari Ini --}}
-            <div class="p-6 bg-white border border-black rounded-lg shadow">
+            {{-- INFAQ HARI INI --}}
+            <div class="p-6 bg-white border border-black shadow rounded-xl">
                 <p class="text-sm text-gray-500">Infaq Hari Ini</p>
-                <h2 class="mt-2 text-2xl font-bold text-blue-600">
-                    Rp {{ number_format($infaqHariIni) }}
-                </h2>
+
+                <div class="mt-3 space-y-1">
+                    <p class="text-lg font-bold text-blue-600">
+                        Rp {{ number_format($infaqHariIniTunai, 0, ',', '.') }}
+                    </p>
+                    <p class="text-sm text-gray-600">
+                        {{ number_format($infaqHariIniBeras, 0, ',', '.') }} Kg Beras
+                    </p>
+                </div>
             </div>
 
-            {{-- Total Zakat --}}
-            <div class="p-6 bg-white border border-black rounded-lg shadow">
+            {{-- TOTAL ZAKAT --}}
+            <div class="p-6 bg-white border border-black shadow rounded-xl">
                 <p class="text-sm text-gray-500">Total Zakat</p>
-                <h2 class="mt-2 text-2xl font-bold text-green-700">
-                    Rp {{ number_format($zakatTotal) }}
-                </h2>
+
+                <div class="mt-3 space-y-1">
+                    <p class="text-lg font-bold text-green-700">
+                        Rp {{ number_format($zakatTotalTunai, 0, ',', '.') }}
+                    </p>
+                    <p class="text-sm text-gray-600">
+                        {{ number_format($zakatTotalBeras, 0, ',', '.') }} Kg Beras
+                    </p>
+                </div>
             </div>
 
-            {{-- Total Infaq --}}
-            <div class="p-6 bg-white border border-black rounded-lg shadow">
+            {{-- TOTAL INFAQ --}}
+            <div class="p-6 bg-white border border-black shadow rounded-xl">
                 <p class="text-sm text-gray-500">Total Infaq</p>
-                <h2 class="mt-2 text-2xl font-bold text-blue-700">
-                    Rp {{ number_format($infaqTotal) }}
-                </h2>
+
+                <div class="mt-3 space-y-1">
+                    <p class="text-lg font-bold text-blue-700">
+                        Rp {{ number_format($infaqTotalTunai, 0, ',', '.') }}
+                    </p>
+                    <p class="text-sm text-gray-600">
+                        {{ number_format($infaqTotalBeras, 0, ',', '.') }} Kg Beras
+                    </p>
+                </div>
             </div>
 
-            {{-- Jumlah Penerima --}}
-            <div class="p-6 bg-white border border-black rounded-lg shadow">
+            {{-- JUMLAH PENERIMA --}}
+            <div class="p-6 bg-white border border-black shadow rounded-xl">
                 <p class="text-sm text-gray-500">Jumlah Penerima</p>
-                <h2 class="mt-2 text-2xl font-bold text-purple-600">
+                <h2 class="mt-3 text-2xl font-bold text-purple-600">
                     {{ $jumlahPenerima }} Orang
                 </h2>
             </div>
 
-            {{-- Jumlah Pembayar --}}
-            <div class="p-6 bg-white border border-black rounded-lg shadow">
+            {{-- JUMLAH PEMBAYAR --}}
+            <div class="p-6 bg-white border border-black shadow rounded-xl">
                 <p class="text-sm text-gray-500">Jumlah Pembayar</p>
-                <h2 class="mt-2 text-2xl font-bold text-orange-600">
+                <h2 class="mt-3 text-2xl font-bold text-orange-600">
                     {{ $jumlahPembayar }} Orang
                 </h2>
             </div>

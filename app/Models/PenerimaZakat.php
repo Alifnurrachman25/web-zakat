@@ -13,6 +13,6 @@ class PenerimaZakat extends Model
         'perumahan',
         'blok',
         'rt',
-        'notes',
+        'kategori',
     ];
 }

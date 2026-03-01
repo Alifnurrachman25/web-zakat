@@ -52,13 +52,27 @@
 
             </div>
 
-            {{-- Notes --}}
+            {{-- Kategori Penerima --}}
+            <div>
+                <label class="block mb-1 font-semibold">Kategori Penerima</label>
+                <select name="kategori" class="w-full px-3 py-2 border border-black rounded">
+                    <option value="">Pilih Kategori Penerima</option>
+                    @foreach ($kategori_penerimas as $k)
+                        <option value="{{ $k->name }}">
+                            {{ $k->name }}
+                        </option>
+                    @endforeach
+                </select>
+
+            </div>
+
+            {{-- Notes
             <div class="mt-4">
                 <label class="block mb-1 font-semibold">Catatan</label>
                 <textarea name="notes" class="w-full px-3 py-2 border border-black rounded"></textarea>
-            </div>
+            </div> --}}
 
-            <div class="mt-6">
+            <div class="mt-6 text-end">
                 <button class="px-6 py-2 text-white bg-green-600 rounded hover:bg-green-700">
                     Simpan
                 </button>

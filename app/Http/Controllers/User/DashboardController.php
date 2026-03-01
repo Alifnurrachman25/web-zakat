@@ -18,33 +18,78 @@ class DashboardController extends Controller
         $userId = auth()->id();
         $today = Carbon::today();
 
-        // ========================
-        // ZAKAT
-        // ========================
-
-        $zakatHariIni = ZakatPayment::whereDate('created_at', $today)
+        /*
+|--------------------------------------------------------------------------
+| ZAKAT HARI INI
+|--------------------------------------------------------------------------
+*/
+        $zakatHariIniTunai = ZakatPayment::where('user_id', $userId)
+            ->where('metode_pembayaran', 'tunai')
+            ->whereDate('created_at', $today)
             ->sum('bayar');
 
-        $zakatTotal = ZakatPayment::sum('bayar');
+        $zakatHariIniBeras = ZakatPayment::where('user_id', $userId)
+            ->where('metode_pembayaran', 'beras')
+            ->whereDate('created_at', $today)
+            ->sum('bayar');
 
-        // ========================
-        // INFAQ
-        // ========================
+        /*
+|--------------------------------------------------------------------------
+| TOTAL ZAKAT
+|--------------------------------------------------------------------------
+*/
+        $zakatTotalTunai = ZakatPayment::where('user_id', $userId)
+            ->where('metode_pembayaran', 'tunai')
+            ->sum('bayar');
 
-        // 🔥 Infaq Manual Hari Ini
+        $zakatTotalBeras = ZakatPayment::where('user_id', $userId)
+            ->where('metode_pembayaran', 'beras')
+            ->sum('bayar');
+
+        /*
+|--------------------------------------------------------------------------
+| INFAQ HARI INI
+|--------------------------------------------------------------------------
+*/
+
+        // Infaq Manual (selalu tunai)
         $infaqManualHariIni = Infaq::where('user_id', $userId)
             ->whereDate('tanggal', $today)
             ->sum('pemasukan_manual');
 
-        // 🔥 Infaq Dari Zakat Hari Ini
-        $infaqDariZakatHariIni = ZakatPayment::where('user_id', $userId)
+        // Infaq dari zakat (tunai)
+        $infaqZakatHariIniTunai = ZakatPayment::where('user_id', $userId)
+            ->where('metode_pembayaran', 'tunai')
             ->whereDate('created_at', $today)
             ->sum('infaq');
 
+        // Infaq dari zakat (beras)
+        $infaqZakatHariIniBeras = ZakatPayment::where('user_id', $userId)
+            ->where('metode_pembayaran', 'beras')
+            ->whereDate('created_at', $today)
+            ->sum('infaq');
 
-        $infaqHariIni = $infaqManualHariIni;
-        $infaqTotal = $grandTotal = Infaq::where('user_id', $userId)->sum('pemasukan_manual') +
-            ZakatPayment::where('user_id', $userId)->sum('infaq');
+        $infaqHariIniTunai = $infaqManualHariIni + $infaqZakatHariIniTunai;
+        $infaqHariIniBeras = $infaqZakatHariIniBeras;
+
+        /*
+|--------------------------------------------------------------------------
+| TOTAL INFAQ
+|--------------------------------------------------------------------------
+*/
+        $infaqManualTotal = Infaq::where('user_id', $userId)
+            ->sum('pemasukan_manual');
+
+        $infaqZakatTotalTunai = ZakatPayment::where('user_id', $userId)
+            ->where('metode_pembayaran', 'tunai')
+            ->sum('infaq');
+
+        $infaqZakatTotalBeras = ZakatPayment::where('user_id', $userId)
+            ->where('metode_pembayaran', 'beras')
+            ->sum('infaq');
+
+        $infaqTotalTunai = $infaqManualTotal + $infaqZakatTotalTunai;
+        $infaqTotalBeras = $infaqZakatTotalBeras;
 
         // ========================
         // JUMLAH PENERIMA
@@ -60,10 +105,14 @@ class DashboardController extends Controller
             ->count('nama_muzakki');
 
         return view('user.dashboard', compact(
-            'zakatHariIni',
-            'zakatTotal',
-            'infaqHariIni',
-            'infaqTotal',
+            'zakatHariIniTunai',
+            'zakatHariIniBeras',
+            'zakatTotalTunai',
+            'zakatTotalBeras',
+            'infaqHariIniTunai',
+            'infaqHariIniBeras',
+            'infaqTotalTunai',
+            'infaqTotalBeras',
             'jumlahPenerima',
             'jumlahPembayar'
         ));

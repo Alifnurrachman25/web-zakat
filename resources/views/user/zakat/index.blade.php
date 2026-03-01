@@ -50,9 +50,15 @@
             </select>
         </div>
 
+
+
         {{-- Table --}}
-        <div x-html="tableData">
-            @include('user.zakat.partials.table', ['payments' => $payments])
+        <div id="stats-container">
+            @include('user.zakat.partials.stats')
+        </div>
+
+        <div id="table-container">
+            @include('user.zakat.partials.table')
         </div>
 
     </div>
@@ -64,11 +70,9 @@
                 perumahan: '',
                 rt: '',
                 zakat: '',
-                tableData: '',
 
-                init() {
-                    this.tableData = this.$el.querySelector('[x-html]').innerHTML;
-                },
+
+
 
                 fetchData(pageUrl = null) {
 
@@ -90,9 +94,12 @@
                                 'X-Requested-With': 'XMLHttpRequest'
                             }
                         })
-                        .then(res => res.text())
-                        .then(html => {
-                            this.tableData = html;
+                        .then(res => res.json()) // ⬅️ UBAH KE JSON
+                        .then(response => {
+
+                            document.getElementById('table-container').innerHTML = response.table;
+                            document.getElementById('stats-container').innerHTML = response.stats;
+
                         });
                 }
             }

@@ -42,8 +42,62 @@ class ZakatPaymentController extends Controller
             ->paginate(10)
             ->withQueryString();
 
+        // ===============================
+        // CLONE QUERY UNTUK STATISTIK
+        // ===============================
+        $statsQuery = ZakatPayment::where('user_id', auth()->id())
+            ->when($search, function ($query) use ($search) {
+                $query->where(function ($q) use ($search) {
+                    $q->where('nama_muzakki', 'like', "%{$search}%")
+                        ->orWhere('phone', 'like', "%{$search}%")
+                        ->orWhere('blok', 'like', "%{$search}%")
+                        ->orWhereHas('zakatType', function ($z) use ($search) {
+                            $z->where('name', 'like', "%{$search}%");
+                        });
+                });
+            })
+            ->when($perumahan, fn($q) => $q->where('perumahan_id', $perumahan))
+            ->when($rt, fn($q) => $q->where('rt_id', $rt))
+            ->when($zakat, fn($q) => $q->where('zakat_type_id', $zakat));
+
+        // ===============================
+        // TOTAL BAYAR
+        // ===============================
+        $totalBayarTunai = (clone $statsQuery)
+            ->where('metode_pembayaran', 'tunai')
+            ->sum('bayar');
+
+        $totalBayarBeras = (clone $statsQuery)
+            ->where('metode_pembayaran', 'beras')
+            ->sum('bayar');
+
+        // ===============================
+        // TOTAL INFAQ
+        // ===============================
+        $totalInfaqTunai = (clone $statsQuery)
+            ->where('metode_pembayaran', 'tunai')
+            ->sum('infaq');
+
+        $totalInfaqBeras = (clone $statsQuery)
+            ->where('metode_pembayaran', 'beras')
+            ->sum('infaq');
+
+        // ===============================
+        // TOTAL MUZAKKI
+        // ===============================
+        $totalMuzakki = (clone $statsQuery)->count();
+
         if ($request->ajax()) {
-            return view('user.zakat.partials.table', compact('payments'))->render();
+            return response()->json([
+                'table' => view('user.zakat.partials.table', compact('payments'))->render(),
+                'stats' => view('user.zakat.partials.stats', compact(
+                    'totalBayarTunai',
+                    'totalBayarBeras',
+                    'totalInfaqTunai',
+                    'totalInfaqBeras',
+                    'totalMuzakki'
+                ))->render()
+            ]);
         }
 
         $perumahans = Perumahan::all();
@@ -54,7 +108,12 @@ class ZakatPaymentController extends Controller
             'payments',
             'perumahans',
             'rts',
-            'zakatTypes'
+            'zakatTypes',
+            'totalBayarTunai',
+            'totalBayarBeras',
+            'totalInfaqTunai',
+            'totalInfaqBeras',
+            'totalMuzakki'
         ));
     }
 

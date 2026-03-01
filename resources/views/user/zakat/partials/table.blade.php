@@ -4,16 +4,16 @@
 
             <thead class="bg-gray-200 border-b border-black">
                 <tr>
-                    <th class="px-4 py-2 text-center border border-black">Tanggal</th>
+                    <th class="px-8 py-2 text-center border border-black">Tanggal</th>
                     <th class="px-4 py-2 text-center border border-black">Nama</th>
-                    <th class="px-4 py-2 text-center border border-black">Perumahan</th>
-                    <th class="px-4 py-2 text-center border border-black">RT</th>
+                    <th class="px-8 py-2 text-center border border-black">Perumahan</th>
+                    <th class="px-8 py-2 text-center border border-black">RT</th>
                     <th class="px-4 py-2 text-center border border-black">Blok</th>
                     <th class="px-4 py-2 text-center border border-black">Nomor HP</th>
                     <th class="px-4 py-2 text-center border border-black">Jenis Zakat</th>
                     <th class="px-4 py-2 text-center border border-black">Metode</th>
-                    <th class="px-4 py-2 text-center border border-black">Total Bayar</th>
-                    <th class="px-4 py-2 text-center border border-black">Infaq</th>
+                    <th class="px-8 py-2 text-center border border-black">Total Bayar</th>
+                    <th class="px-8 py-2 text-center border border-black">Infaq</th>
                     <th class="px-4 py-2 text-center border border-black">Aksi</th>
                 </tr>
             </thead>
