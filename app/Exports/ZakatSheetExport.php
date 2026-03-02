@@ -10,16 +10,21 @@ class ZakatSheetExport implements FromCollection, WithHeadings
 {
     public function collection()
     {
-        return ZakatPayment::select(
-            'nama_muzakki',
-            'phone',
-            'blok',
-            'jumlah_jiwa',
-            'metode_pembayaran',
-            'bayar',
-            'infaq',
-            'created_at'
-        )->get();
+        return ZakatPayment::with('perumahan')
+            ->get()
+            ->map(function ($zakat) {
+                return [
+                    'nama_muzakki'      => $zakat->nama_muzakki,
+                    'phone'             => $zakat->phone,
+                    'perumahan'         => $zakat->perumahan->name ?? '-',
+                    'blok'              => $zakat->blok,
+                    'jumlah_jiwa'       => $zakat->jumlah_jiwa,
+                    'metode_pembayaran' => $zakat->metode_pembayaran,
+                    'bayar'             => $zakat->bayar,
+                    'infaq'             => $zakat->infaq,
+                    'created_at'        => $zakat->created_at->format('d-m-Y'),
+                ];
+            });
     }
 
     public function headings(): array
@@ -27,6 +32,7 @@ class ZakatSheetExport implements FromCollection, WithHeadings
         return [
             'Nama Muzakki',
             'No HP',
+            'Perumahan',
             'Blok',
             'Jumlah Jiwa',
             'Metode Pembayaran',

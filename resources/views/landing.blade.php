@@ -17,8 +17,8 @@
 <body class="text-gray-900 bg-gray-50">
 
     <nav class="flex items-center justify-between p-6 bg-white shadow-sm">
-        <div class="text-xl font-bold text-emerald-600">
-            🕌 AL IKHLAS TBS2
+        <div class="flex items-center gap-3">
+            <img src="{{ asset('images/logo-masjid.jpg') }}" alt="Logo Masjid" class="object-contain h-10 px-3 w-100">
         </div>
         <div>
             @if (Route::has('login'))
@@ -87,8 +87,23 @@
         </div>
     </main>
 
-    <footer class="py-10 mt-32 text-sm text-center text-gray-400 border-t">
-        &copy; {{ date('Y') }} Masjid AL IKHLAS TBS2. All rights reserved.
+    <footer class="py-10 mt-32 text-sm text-center text-gray-500 border-t shadow-black">
+
+        <div class="flex flex-col items-center justify-center gap-4">
+
+            <div class="flex items-center gap-6">
+                <img src="{{ asset('images/logo-masjid.jpg') }}" alt="Logo Masjid" class="object-contain h-12">
+
+                <img src="{{ asset('images/logo-baznas.jpeg') }}" alt="Logo BAZNAS" class="object-contain h-12">
+            </div>
+
+            <p>
+                &copy; {{ date('Y') }} Masjid AL IKHLAS TBS2.
+                Bekerja sama dengan BAZNAS.
+            </p>
+
+        </div>
+
     </footer>
 
 </body>

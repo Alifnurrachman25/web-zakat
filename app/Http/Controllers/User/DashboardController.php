@@ -91,6 +91,46 @@ class DashboardController extends Controller
         $infaqTotalTunai = $infaqManualTotal + $infaqZakatTotalTunai;
         $infaqTotalBeras = $infaqZakatTotalBeras;
 
+        /*
+|--------------------------------------------------------------------------
+| ZAKAT MAAL (Masuk BAZNAS)
+|--------------------------------------------------------------------------
+*/
+
+        $zakatMaalTunai = ZakatPayment::where('user_id', $userId)
+            ->whereHas('zakatType', function ($q) {
+                $q->where('name', 'like', '%maal%');
+            })
+            ->where('metode_pembayaran', 'tunai')
+            ->sum('bayar');
+
+        $zakatMaalBeras = ZakatPayment::where('user_id', $userId)
+            ->whereHas('zakatType', function ($q) {
+                $q->where('name', 'like', '%maal%');
+            })
+            ->where('metode_pembayaran', 'beras')
+            ->sum('bayar');
+
+        /*
+|--------------------------------------------------------------------------
+| ZAKAT FITRAH (Dibagi ke Penerima)
+|--------------------------------------------------------------------------
+*/
+
+        $zakatFitrahTunai = ZakatPayment::where('user_id', $userId)
+            ->whereHas('zakatType', function ($q) {
+                $q->where('name', 'like', '%fitrah%');
+            })
+            ->where('metode_pembayaran', 'tunai')
+            ->sum('bayar');
+
+        $zakatFitrahBeras = ZakatPayment::where('user_id', $userId)
+            ->whereHas('zakatType', function ($q) {
+                $q->where('name', 'like', '%fitrah%');
+            })
+            ->where('metode_pembayaran', 'beras')
+            ->sum('bayar');
+
         // ========================
         // JUMLAH PENERIMA
         // ========================
@@ -104,6 +144,16 @@ class DashboardController extends Controller
         $jumlahPembayar = ZakatPayment::distinct('nama_muzakki')
             ->count('nama_muzakki');
 
+        $jumlahPenerima = PenerimaZakat::count();
+
+        $fitrahPerOrangTunai = $jumlahPenerima > 0
+            ? $zakatFitrahTunai / $jumlahPenerima
+            : 0;
+
+        $fitrahPerOrangBeras = $jumlahPenerima > 0
+            ? $zakatFitrahBeras / $jumlahPenerima
+            : 0;
+
         return view('user.dashboard', compact(
             'zakatHariIniTunai',
             'zakatHariIniBeras',
@@ -114,7 +164,13 @@ class DashboardController extends Controller
             'infaqTotalTunai',
             'infaqTotalBeras',
             'jumlahPenerima',
-            'jumlahPembayar'
+            'jumlahPembayar',
+            'zakatMaalTunai',
+            'zakatMaalBeras',
+            'zakatFitrahTunai',
+            'zakatFitrahBeras',
+            'fitrahPerOrangTunai',
+            'fitrahPerOrangBeras',
         ));
     }
 }

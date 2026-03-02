@@ -15,7 +15,7 @@ class PenerimaSheetExport implements FromCollection, WithHeadings
             'perumahan',
             'blok',
             'rt',
-            'notes'
+            'kategori'
         )->get();
     }
 
@@ -26,7 +26,7 @@ class PenerimaSheetExport implements FromCollection, WithHeadings
             'Perumahan',
             'Blok',
             'RT',
-            'Catatan'
+            'Kategori'
         ];
     }
 }
