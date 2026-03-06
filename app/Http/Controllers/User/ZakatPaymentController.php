@@ -318,8 +318,8 @@ class ZakatPaymentController extends Controller
     {
         $payments = ZakatPayment::with('perumahan')
             ->latest()
-            ->get();
+            ->paginate(10);
 
-        return view('zakat_payments.partials.table', compact('payments'));
+        return view('user.zakat.partials.table', compact('payments'));
     }
 }

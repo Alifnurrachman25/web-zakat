@@ -109,7 +109,7 @@
             fetch("{{ route('zakat-payments.data') }}")
                 .then(response => response.text())
                 .then(data => {
-                    document.getElementById("zakat-table").innerHTML = data;
+                    document.getElementById("table-container").innerHTML = data;
                 });
         }
 

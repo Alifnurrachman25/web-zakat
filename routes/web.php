@@ -18,8 +18,12 @@ Route::get('/export-lengkap', function () {
 })->name('export.lengkap');
 
 
-Route::get('/zakat-payments/data', [ZakatPaymentController::class, 'data'])
-    ->name('zakat-payments.data');
+
+Route::middleware(['auth'])->group(function () {
+
+    Route::get('/user/zakat/data', [ZakatPaymentController::class, 'data'])
+        ->name('zakat-payments.data');
+});
 
 // Route::get('/dashboard', function () {
 //     return view('dashboard');
