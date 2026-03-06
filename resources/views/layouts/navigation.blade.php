@@ -97,7 +97,13 @@
 
             {{-- User Zakat --}}
             <x-responsive-nav-link :href="route('user.zakat.index')" :active="request()->routeIs('user.zakat.*')">
-                {{ __('Zakat Saya') }}
+                {{ __('Bayar Zakat') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('user.infaq.index')" :active="request()->routeIs('user.infaq.*')">
+                {{ __('Infaq Harian') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('user.penerima-zakat.index')" :active="request()->routeIs('user.penerima-zakat.*')">
+                {{ __('Penerima Zakat') }}
             </x-responsive-nav-link>
 
             {{-- Admin --}}

@@ -104,5 +104,15 @@
                 }
             }
         }
+
+        function loadTable() {
+            fetch("{{ route('zakat-payments.data') }}")
+                .then(response => response.text())
+                .then(data => {
+                    document.getElementById("zakat-table").innerHTML = data;
+                });
+        }
+
+        setInterval(loadTable, 3000); // reload tiap 5 detik
     </script>
 </x-app-layout>

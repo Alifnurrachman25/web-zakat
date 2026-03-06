@@ -1,12 +1,11 @@
 <?php
 
-use App\Http\Controllers\ProfileController;
-use Illuminate\Support\Facades\Route;
+use App\Exports\LaporanLengkapExport;
 use App\Http\Controllers\Admin\RiceTypeController;
 use App\Http\Controllers\Admin\ZakatTypeController;
-
-
-use App\Exports\LaporanLengkapExport;
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\User\ZakatPaymentController;
+use Illuminate\Support\Facades\Route;
 use Maatwebsite\Excel\Facades\Excel;
 
 
@@ -18,6 +17,9 @@ Route::get('/export-lengkap', function () {
     return Excel::download(new LaporanLengkapExport, 'laporan_lengkap_zakat.xlsx');
 })->name('export.lengkap');
 
+
+Route::get('/zakat-payments/data', [ZakatPaymentController::class, 'data'])
+    ->name('zakat-payments.data');
 
 // Route::get('/dashboard', function () {
 //     return view('dashboard');

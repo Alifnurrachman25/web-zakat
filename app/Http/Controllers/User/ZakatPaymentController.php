@@ -313,4 +313,13 @@ class ZakatPaymentController extends Controller
         $zakat->delete();
         return redirect()->route('user.zakat.index')->with('success', 'Pembayaran berhasil dihapus');
     }
+
+    public function data()
+    {
+        $payments = ZakatPayment::with('perumahan')
+            ->latest()
+            ->get();
+
+        return view('zakat_payments.partials.table', compact('payments'));
+    }
 }
