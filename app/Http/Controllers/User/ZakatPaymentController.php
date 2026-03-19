@@ -200,9 +200,13 @@ class ZakatPaymentController extends Controller
         // ZAKAT MAAL & FIDIYAH
         // ===============================
         else {
-            // bebas, tidak ada kewajiban
-            $bayar = $request->bayar ?? 0;
-            $infaq = 0;
+            if ($request->metode_pembayaran === 'beras') {
+                $bayar = $request->beras_kg; // ✅ ini yang benar
+                $infaq = 0;
+            } else {
+                $bayar = $request->bayar ?? 0;
+                $infaq = 0;
+            }
         }
 
         ZakatPayment::create([
@@ -261,30 +265,46 @@ class ZakatPaymentController extends Controller
 
         // ✅ LANGSUNG PAKAI NILAI DARI FORM
         $totalOrang = $request->jumlah_jiwa;
+        $zakatType = ZakatType::findOrFail($request->zakat_type_id);
+        $isFitrah = strtolower($zakatType->name) === 'zakat fitrah';
 
-        if ($request->metode_pembayaran === 'tunai') {
-            $rice = RiceType::findOrFail($request->rice_type_id);
-            $wajibBayar = $rice->price * $totalOrang;
-            $bayar = $request->bayar;
-            if ($bayar < $wajibBayar) {
-                return back()
-                    ->withErrors([
+        if ($isFitrah) {
+
+            if ($request->metode_pembayaran === 'tunai') {
+
+                $rice = RiceType::findOrFail($request->rice_type_id);
+                $wajibBayar = $rice->price * $totalOrang;
+
+                if ($request->bayar < $wajibBayar) {
+                    return back()->withErrors([
                         'bayar' => 'Nominal bayar tidak boleh kurang dari kewajiban zakat.'
-                    ])
-                    ->withInput();
-            }
-            $infaq = max(0, $bayar - $wajibBayar);
-        } else {
-            $wajibKg = $totalOrang * 3;
-            if ($request->beras_kg < $wajibKg) {
-                return back()
-                    ->withErrors([
+                    ])->withInput();
+                }
+
+                $bayar = $request->bayar;
+                $infaq = max(0, $bayar - $wajibBayar);
+            } else {
+                $wajibKg = $totalOrang * 3;
+
+                if ($request->beras_kg < $wajibKg) {
+                    return back()->withErrors([
                         'beras_kg' => 'Jumlah beras tidak boleh kurang dari kewajiban zakat.'
-                    ])
-                    ->withInput();
+                    ])->withInput();
+                }
+
+                $bayar = $wajibKg;
+                $infaq = max(0, $request->beras_kg - $wajibKg);
             }
-            $bayar = $wajibKg;
-            $infaq = max(0, $request->beras_kg - $wajibKg);
+        } else {
+
+            // ✅ MAAL & FIDYAH (BEBAS)
+            if ($request->metode_pembayaran === 'beras') {
+                $bayar = $request->beras_kg;
+                $infaq = 0;
+            } else {
+                $bayar = $request->bayar ?? 0;
+                $infaq = 0;
+            }
         }
 
         $zakat->update([
